@@ -29,7 +29,12 @@
                     </div>
                 </div>
                 <div id="show_api_key">
-                    <p><b class="highlighted-element"><span id="api_key_value"></span></b></p>
+                    <div class="api-key-copy-container">
+                        <b class="highlighted-element api-key-value-box"><span id="api_key_value"></span></b>
+                        <button type="button" class="copy-button tippy-zulip-tooltip" data-tippy-content="{{t 'Copy API key' }}" data-tippy-placement="right" data-clipboard-target="#api_key_value" aria-label="{{t 'Copy API key' }}">
+                            <i class="zulip-icon zulip-icon-copy" aria-hidden="true"></i>
+                        </button>
+                    </div>
                     <div id="user_api_key_error" class="text-error"></div>
                 </div>
             </main>

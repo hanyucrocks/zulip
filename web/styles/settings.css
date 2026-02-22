@@ -1374,6 +1374,27 @@ label.preferences-radio-choice-label {
     min-width: initial !important;
 }
 
+/*
+Added the CSS for the Copy API key button and the container of API key value and the button in the API key modal.
+*/
+.api-key-copy-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.api-key-value-box {
+    margin-bottom: 0;
+}
+
+.api-key-copy-container .copy-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+}
+
 #api_key_buttons {
     display: inline-flex;
 
