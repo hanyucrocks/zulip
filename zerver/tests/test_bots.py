@@ -61,8 +61,8 @@ class BotTest(ZulipTestCase, UploadSerializeMixin):
         bot = get_user(email, realm)
         return bot
 
-    def assert_num_bots_equal(self, count: int) -> None:
-        result = self.client_get("/json/bots")
+    def assert_num_bots_equal(self, count: int, skip_openapi_validation: bool = False) -> None:
+        result = self.client_get("/json/bots", skip_openapi_validation=skip_openapi_validation)
         response_dict = self.assert_json_success(result)
         self.assert_length(response_dict["bots"], count)
 
@@ -76,7 +76,12 @@ class BotTest(ZulipTestCase, UploadSerializeMixin):
         return bot_info
 
     def create_bot(self, **extras: Any) -> dict[str, Any]:
-        result = self.client_post("/json/bots", self.bot_creation_info(**extras))
+        skip_openapi_validation = extras.pop("skip_openapi_validation", False)
+        result = self.client_post(
+            "/json/bots",
+            self.bot_creation_info(**extras),
+            skip_openapi_validation=skip_openapi_validation,
+        )
         response_dict = self.assert_json_success(result)
         return response_dict
 
@@ -150,20 +155,20 @@ class BotTest(ZulipTestCase, UploadSerializeMixin):
     @override_settings(FAKE_EMAIL_DOMAIN="invaliddomain", REALM_HOSTS={"zulip": "127.0.0.1"})
     def test_add_bot_with_invalid_fake_email_domain(self) -> None:
         self.login("hamlet")
-        self.assert_num_bots_equal(0)
+        self.assert_num_bots_equal(0, skip_openapi_validation=True)
         bot_info = {
             "full_name": "The Bot of Hamlet",
             "short_name": "hambot",
             "bot_type": "1",
         }
-        result = self.client_post("/json/bots", bot_info)
+        result = self.client_post("/json/bots", bot_info, skip_openapi_validation=True)
 
         error_message = (
             "Can't create bots until FAKE_EMAIL_DOMAIN is correctly configured.\n"
             "Please contact your server administrator."
         )
         self.assert_json_error(result, error_message)
-        self.assert_num_bots_equal(0)
+        self.assert_num_bots_equal(0, skip_openapi_validation=True)
 
     def test_add_bot_with_no_name(self) -> None:
         self.login("hamlet")
@@ -237,9 +242,9 @@ class BotTest(ZulipTestCase, UploadSerializeMixin):
     @override_settings(FAKE_EMAIL_DOMAIN="fakedomain.com", REALM_HOSTS={"zulip": "127.0.0.1"})
     def test_add_bot_with_fake_email_domain(self) -> None:
         self.login("hamlet")
-        self.assert_num_bots_equal(0)
-        self.create_bot()
-        self.assert_num_bots_equal(1)
+        self.assert_num_bots_equal(0, skip_openapi_validation=True)
+        self.create_bot(skip_openapi_validation=True)
+        self.assert_num_bots_equal(1, skip_openapi_validation=True)
 
         email = "hambot-bot@fakedomain.com"
         self.get_bot_user(email)
@@ -247,9 +252,9 @@ class BotTest(ZulipTestCase, UploadSerializeMixin):
     @override_settings(EXTERNAL_HOST="example.com")
     def test_add_bot_verify_subdomain_in_email_address(self) -> None:
         self.login("hamlet")
-        self.assert_num_bots_equal(0)
-        self.create_bot()
-        self.assert_num_bots_equal(1)
+        self.assert_num_bots_equal(0, skip_openapi_validation=True)
+        self.create_bot(skip_openapi_validation=True)
+        self.assert_num_bots_equal(1, skip_openapi_validation=True)
 
         email = "hambot-bot@zulip.example.com"
         self.get_bot_user(email)
@@ -259,9 +264,9 @@ class BotTest(ZulipTestCase, UploadSerializeMixin):
     )
     def test_add_bot_host_used_as_domain_if_valid(self) -> None:
         self.login("hamlet")
-        self.assert_num_bots_equal(0)
-        self.create_bot()
-        self.assert_num_bots_equal(1)
+        self.assert_num_bots_equal(0, skip_openapi_validation=True)
+        self.create_bot(skip_openapi_validation=True)
+        self.assert_num_bots_equal(1, skip_openapi_validation=True)
 
         email = "hambot-bot@zulip.example.com"
         self.get_bot_user(email)
